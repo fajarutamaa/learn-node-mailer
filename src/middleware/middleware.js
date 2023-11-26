@@ -7,6 +7,7 @@ function CheckRegister(req, res, next) {
         email: Joi.string().email().required(),
         password: Joi.string().pattern(new RegExp('^[a-zA-Z0-9!@#$%^&*()]{8,30}$')).required(),
         dob: Joi.date().iso().required(),
+        age:Joi.number().positive().required()
     })
 
     const { error } = schema.validate(req.body)

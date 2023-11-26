@@ -1,7 +1,7 @@
 const { ComparePassword, HashPassword, HashToken } = require('../../helpers/pass.helper')
 const { ResponseTemplate } = require('../../helpers/resp.helper')
 const { PrismaClient } = require('@prisma/client')
-const nodemailer = require('nodemailer')
+const { UserActivation } = require('../../libs/mailer')
 
 const prisma = new PrismaClient
 
@@ -18,7 +18,7 @@ async function Register(req, res, next) {
         email,
         password: hashPass,
         dob: new Date(dob),
-        age,
+        age: parseInt(age),
         is_verified
     }
 
@@ -37,12 +37,19 @@ async function Register(req, res, next) {
             })
         }
 
-        await prisma.users.create({
+        const user = await prisma.users.create({
             data: {
                 ...payload
             },
         })
 
+        const activationLink = `${req.protocol}://${req.get('host')}/api/v1/activation/${user.id}`
+
+        if (user) {
+            if (!user.is_verified) {
+                await UserActivation(user.email, activationLink)
+            }
+        }
 
         return res.status(200).json({
             message: 'success',
@@ -71,6 +78,12 @@ async function Login(req, res, next) {
             return
         }
 
+        if(!user.is_verified){
+            let response = ResponseTemplate(null, 'account not verified', 400)
+            res.status(400).json(response)
+            return
+        }
+
         let checkPassword = await ComparePassword(password, user.password)
 
         if (!checkPassword) {
@@ -81,13 +94,11 @@ async function Login(req, res, next) {
 
         let token = jwt.sign(user, process.env.JWT_SECRET_KEY)
 
-        res.status(200).json({
-            token:HashToken(token),
-            message:'success',
-            status:200
+        return res.status(200).json({
+            token: token,
+            message: 'success',
+            status: 200
         })
-        return
-
     } catch (error) {
         next(error)
     }
