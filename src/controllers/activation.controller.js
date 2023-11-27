@@ -1,11 +1,11 @@
 const { PrismaClient } = require('@prisma/client')
-const {Notification} = require('../libs/mailer')
+const { Notification } = require('../libs/mailer')
 
 
 const prisma = new PrismaClient()
 
 async function ActivateAccount(req, res, next) {
-    const { id, token, email } = req.params
+    const { id } = req.params
 
     try {
 
@@ -18,7 +18,7 @@ async function ActivateAccount(req, res, next) {
         }
 
         // Update the user's is_verified status in the database
-        await prisma.users.update({
+        const user = await prisma.users.update({
             where: {
                 id: id,
             },
@@ -27,7 +27,9 @@ async function ActivateAccount(req, res, next) {
             },
         })
 
-        await Notification(email)
+        if(user.is_verified){
+            await Notification(user.email)
+        }
 
         return res.status(200).json({
             message: 'Account activated successfully',

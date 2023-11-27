@@ -10,16 +10,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Roles {
+  member
+  admin
+}
+
 model Users {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   name            String
-  email           String   @unique
+  email           String    @unique
   password        String
-  dob             DateTime @db.Date
+  dob             DateTime  @db.Date
   age             Int
   profile_picture String?
-  is_verified     Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  is_verified     Boolean   @default(false)
+  role            Roles     @default(member)
+  createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
 }

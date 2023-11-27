@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "Roles" AS ENUM ('member', 'admin');
+
 -- CreateTable
 CREATE TABLE "Users" (
     "id" TEXT NOT NULL,
@@ -8,6 +11,7 @@ CREATE TABLE "Users" (
     "age" INTEGER NOT NULL,
     "profile_picture" TEXT,
     "is_verified" BOOLEAN NOT NULL DEFAULT false,
+    "role" "Roles" NOT NULL DEFAULT 'member',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),

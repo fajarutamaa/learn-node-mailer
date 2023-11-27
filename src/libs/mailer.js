@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer')
+const {generatePromoCode}= require('../helpers/promo.helper')
 
 const transporter = nodemailer.createTransport({
     service: process.env.SERVICE,
@@ -41,7 +42,7 @@ async function Notification(email) {
         to: email,
         subject: 'Notif - Verify Your Account',
         html: `
-        <p>Account activated successfully!</p>     
+        <h1>Account activated successfully!</h1>     
         `,
     }
     try {
@@ -54,4 +55,24 @@ async function Notification(email) {
     }
 }
 
-module.exports = { UserActivation, Notification }
+async function SendPromo(email) {
+    
+    const mailOptions = {
+        from: process.env.SENDER,
+        to: email,
+        subject: 'Notif - Verify Your Account',
+        html: `
+        <h1>Congratulations you have code promo special : ${generatePromoCode}</h1>     
+        `,
+    }
+    try {
+        const info = await transporter.sendMail(mailOptions)
+        console.log("Notif email sent: " + info.response)
+        return true;
+    } catch (error) {
+        console.error(error)
+        return false
+    }
+}
+
+module.exports = { UserActivation, Notification, SendPromo }
